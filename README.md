@@ -1,0 +1,2 @@
+# workspace
+golang-workspace
