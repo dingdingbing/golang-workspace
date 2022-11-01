@@ -32,22 +32,6 @@ const (
 
 var access_token string
 
-func main() {
-
-	// 好像初始化用的
-	time.Now().UnixNano()
-	cronHere("18")
-	// // 每隔两小时刷新一次
-	// access_token = "42ee5389-5461-4d61-a441-3317fc8ac27d"
-	// // 1. 提前一分钟校验是否能够正常获取接口状态
-	// err := getStock("12")
-	// if err != nil {
-	// 	noticePhone("错误！", err.Error())
-	// 	return
-	// }
-	// send("12", 30)
-}
-
 /*
 *
 
@@ -190,4 +174,34 @@ func transformation(response *http.Response) map[string]string {
 		json.Unmarshal([]byte(string(body)), &result)
 	}
 	return result
+}
+
+// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
+// 测试通过
+func getPeriodTime() string {
+
+	// 设置时区，否则默认 UTC=美国时间
+	location, _ := time.LoadLocation("Asia/Shanghai")
+	now := time.Now()
+	year := now.Format("2006")
+	month := now.Format("01")
+	day := now.Format("02")
+
+	morning, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v 08:00:00", year, month, day), location)
+	// fmt.Println(morning)
+	noon, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v 12:00:00", year, month, day), location)
+	// fmt.Println(noon)
+	night, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v 18:00:00", year, month, day), location)
+	// fmt.Println(night)
+
+	if now.Before(morning) {
+		return "08"
+	} else if now.Before(noon) {
+		return "12"
+	} else if now.Before(night) {
+		return "18"
+	} else {
+		return "18"
+	}
+
 }
