@@ -23,16 +23,18 @@ func couponClock(period string, amount int) {
 		for {
 			flag := send(period, amount)
 			i++
-			if flag || i > 5 {
+			if flag || i > 10 {
 				break
 			}
 			// sleep 1s 尝试
-			time.Sleep(time.Second * 1)
+			time.Sleep(time.Millisecond * 100)
 		}
 	})
 	c.Start()
-	defer c.Stop()
-	// time.Sleep(time.Second * 60)
+	// defer c.Stop()
+	// time.Sleep(time.Minute * 10)
+	// 主线程一直睡眠
+	select {}
 }
 
 /*
@@ -46,5 +48,6 @@ func sendtest(hour string, price int) bool {
 	num := rand.Float32()
 	flag := num < 0.5
 	fmt.Printf("now: %v, hour: %v,flag: %v, num:%v", time.Now(), hour, flag, num)
+	noticePhone("测试定时任务", fmt.Sprintf("准点测试时间%v", time.Now()))
 	return flag
 }

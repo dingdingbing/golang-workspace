@@ -80,9 +80,12 @@ func send(period string, price int) bool {
 	case http.StatusUnauthorized:
 		title, message = "很遗憾！-2", "当前用户token已经过期"
 		break
+	case http.StatusServiceUnavailable:
+		title, message = "很遗憾没抢到", "券没啦~看来你的sleep时间还得短一点"
+		return true
 	default:
 		result := transformation(res)
-		fmt.Printf("status: %v, response: %v", result, result["code"])
+		fmt.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
 		title, message = "很遗憾！-3", fmt.Sprintf("错误，请检查代码, status: %d, response: %v", res.StatusCode, result["msg"])
 		break
 	}
