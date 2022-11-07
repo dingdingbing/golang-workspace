@@ -8,6 +8,9 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+const Layout = "2006-01-02 15:04:05"
+const Layout2 = "2006-01-02"
+
 /*
 *
 
@@ -28,7 +31,7 @@ func couponClock(period string, amount int, accessToken string) {
 	month := now.Format("01")
 	day := now.Format("02")
 	// 关闭程序时间，以免造成资源浪费
-	closeTime, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v %v:01:00", year, month, day, period), location)
+	closeTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:01:00", year, month, day, period), location)
 
 	// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
 	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
@@ -77,6 +80,6 @@ func sendtest(hour string, price int, accessToken string) bool {
 	num := rand.Float32()
 	flag := num < 0.5
 	fmt.Printf("now: %v, hour: %v,flag: %v, num:%v", time.Now(), hour, flag, num)
-	noticePhone("测试定时任务", fmt.Sprintf("准点测试时间%v", time.Now()))
+	noticeMasterPhone("测试定时任务", fmt.Sprintf("准点测试时间%v", time.Now()))
 	return flag
 }

@@ -56,7 +56,7 @@ func send(period string, price int, accessToken string) bool {
 	if err != nil {
 		title, message = "很遗憾！-1", err.Error()
 		// send bark to phone
-		noticePhone(title, message)
+		noticeMasterPhone(title, message)
 		return false
 	}
 	url := "https://mapv2.51yundong.me/api/coupon/coupons/send?stockId=" + stockId + "&time=" + period + "%3A00"
@@ -70,10 +70,14 @@ func send(period string, price int, accessToken string) bool {
 	req.Header.Add("Referer", "https://servicewechat.com/wx8b97e9b9a6441e29/175/page-frame.html")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	res, _ := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
 	switch res.StatusCode {
 	case http.StatusOK:
-		noticePhone(title, message)
+		noticeMasterPhone(title, message)
 		return true
 	case http.StatusUnauthorized:
 		title, message = "很遗憾！-2", "当前用户token已经过期"
@@ -88,7 +92,7 @@ func send(period string, price int, accessToken string) bool {
 		break
 	}
 
-	noticePhone(title, message)
+	noticeMasterPhone(title, message)
 	return false
 }
 
@@ -164,12 +168,8 @@ func getStockId(price int) (string, error) {
 	return stockId, nil
 }
 
-func noticePhone(title string, content string) {
-	http.Get("https://api.day.app/RYXFHftgRhq5BsomYwEb5J/" + title + "/" + content)
-}
-
 func transformation(response *http.Response) map[string]string {
-	var result map[string]string
+	result := make(map[string]string)
 	body, err := ioutil.ReadAll(response.Body)
 	if err == nil {
 		json.Unmarshal([]byte(string(body)), &result)

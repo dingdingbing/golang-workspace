@@ -36,7 +36,7 @@ func robCoupon(c *gin.Context) {
 		int = 30
 	}
 
-	noticePhone("恭喜您~", fmt.Sprintf("将于今日%v点整为您抢%v元消费券", period, amount))
+	noticeMasterPhone("恭喜您~", fmt.Sprintf("将于今日%v点整为您抢%v元消费券", period, amount))
 	c.IndentedJSON(http.StatusOK, fmt.Sprintf("将于今日%v点整为您抢%v元消费券", period, amount))
 	couponClock(period, int, accessToken)
 
