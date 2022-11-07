@@ -30,8 +30,6 @@ const (
 	Coupons80        = "6229976ffceddb10cd1cb64f"
 )
 
-var access_token string
-
 /*
 *
 
@@ -49,7 +47,7 @@ var access_token string
 
 *
 */
-func send(period string, price int) bool {
+func send(period string, price int, accessToken string) bool {
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 
@@ -66,7 +64,7 @@ func send(period string, price int) bool {
 
 	req.Header.Add("Host", "mapv2.51yundong.me")
 	req.Header.Add("Connection", "keep-alive")
-	req.Header.Add("Authorization", "Bearer "+access_token)
+	req.Header.Add("Authorization", "Bearer "+accessToken)
 	req.Header.Add("Accept-Encoding", "gzip,compress,br,deflate")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.29(0x18001d30) NetType/4G Language/zh_CN")
 	req.Header.Add("Referer", "https://servicewechat.com/wx8b97e9b9a6441e29/175/page-frame.html")
@@ -107,14 +105,14 @@ func send(period string, price int) bool {
 
 *
 */
-func getStock(period string) error {
+func getStock(period string, accessToken string) error {
 
 	url := "https://mapv2.51yundong.me/api/coupon/stocks?view=&groupId=common&time=" + period + "%3A00&noHaveCode=true"
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Host", "mapv2.51yundong.me")
 	req.Header.Add("Connection", "keep-alive")
-	req.Header.Add("Authorization", "Bearer "+access_token)
+	req.Header.Add("Authorization", "Bearer "+accessToken)
 	req.Header.Add("Accept-Encoding", "gzip,compress,br,deflate")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.29(0x18001d30) NetType/4G Language/zh_CN")
 	req.Header.Add("Referer", "https://servicewechat.com/wx8b97e9b9a6441e29/175/page-frame.html")

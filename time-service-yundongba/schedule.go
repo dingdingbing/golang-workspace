@@ -8,33 +8,62 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func couponClock(period string, amount int) {
+/*
+*
+
+	couponClock: 定时任务
+	description: 会在指定时间抢券,每次仅抢券一张,有重试机制，过了抢券时间的一分钟后，程序会结束
+	period 即将抢券的时间段
+	amount 抢券的金额
+	accessToken 密钥
+
+*
+*/
+func couponClock(period string, amount int, accessToken string) {
 	c := cron.New(cron.WithSeconds())
 
+	location, _ := time.LoadLocation("Asia/Shanghai")
+	now := time.Now()
+	year := now.Format("2006")
+	month := now.Format("01")
+	day := now.Format("02")
+	// 关闭程序时间，以免造成资源浪费
+	closeTime, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v %v:01:00", year, month, day, period), location)
+
 	// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
-	// 指定时间执行，cron格式（秒，分，时，天，月，周）
-	// spec := fmt.Sprintf("00 00 %v %v %v ?", hour, time.Now().Format("02"), time.Now().Format("01"))
-	spec := fmt.Sprintf("00 00 %v %v %v ?", period, time.Now().Format("02"), time.Now().Format("01"))
+	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
+	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
 	fmt.Println(spec)
 	var i int = 0
 
 	c.AddFunc(spec, func() {
 		// 尝试三次 测试成功
 		for {
-			flag := send(period, amount)
+			flag := send(period, amount, accessToken)
 			i++
 			if flag || i > 10 {
 				break
 			}
-			// sleep 1s 尝试
-			time.Sleep(time.Millisecond * 100)
+			// sleep 10ms 尝试
+			time.Sleep(time.Millisecond * 10)
 		}
 	})
 	c.Start()
-	// defer c.Stop()
-	// time.Sleep(time.Minute * 10)
-	// 主线程一直睡眠
-	select {}
+	defer c.Stop()
+
+	/**
+		主线程一直睡眠
+		select {}
+		主线程睡眠2小时后关闭,token最长有效期为2h, 但是一直开启线程有种浪费的感觉
+		time.Sleep(time.Hour * 2)
+	**/
+	// 在任务结束的5分钟后结束定时任务 测试通过
+	for {
+		if time.Now().After(closeTime) {
+			fmt.Println("结束！")
+			break
+		}
+	}
 }
 
 /*
@@ -44,7 +73,7 @@ func couponClock(period string, amount int) {
 
 *
 */
-func sendtest(hour string, price int) bool {
+func sendtest(hour string, price int, accessToken string) bool {
 	num := rand.Float32()
 	flag := num < 0.5
 	fmt.Printf("now: %v, hour: %v,flag: %v, num:%v", time.Now(), hour, flag, num)

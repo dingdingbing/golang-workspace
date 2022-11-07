@@ -9,10 +9,10 @@ import (
 )
 
 func checkAuth(c *gin.Context) {
-	access_token = c.Param("token")
+	accessToken := c.Param("token")
 
 	period := getPeriodTime()
-	err := getStock(period)
+	err := getStock(period, accessToken)
 	if err == nil {
 		c.IndentedJSON(http.StatusOK, "当前token有效!")
 	} else {
@@ -21,8 +21,8 @@ func checkAuth(c *gin.Context) {
 }
 
 func robCoupon(c *gin.Context) {
-	access_token = c.Param("token")
-	if len(access_token) == 0 {
+	accessToken := c.Param("token")
+	if len(accessToken) == 0 {
 		c.IndentedJSON(http.StatusInternalServerError, "你传的token不对!")
 		return
 	}
@@ -38,7 +38,7 @@ func robCoupon(c *gin.Context) {
 
 	noticePhone("恭喜您~", fmt.Sprintf("将于今日%v点整为您抢%v元消费券", period, amount))
 	c.IndentedJSON(http.StatusOK, fmt.Sprintf("将于今日%v点整为您抢%v元消费券", period, amount))
-	couponClock(period, int)
+	couponClock(period, int, accessToken)
 
 }
 
