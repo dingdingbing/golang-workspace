@@ -33,13 +33,14 @@ import (
 	需要保持连续不中断
 	param: month - 月
 	param：day - 日
-	param: period - 订阅时间段
-	return : int 0-失败 1-成功 2-其他情况
+	param: start - 订阅开始时间
+	param: end - 订阅结束时间
+	return : int 0-失败 1-成功 2-部分成功
 	return : error 具体失败信息
 
 *
 */
-func subscribeGymnasiums(month string, day string, start string, long int) (int, string) {
+func subscribeGymnasiums(month string, day string, start int, end int) (int, string) {
 	now := time.Now()
 	year := now.Year()
 	_, err := time.Parse(Layout2, fmt.Sprintf("%v-%v-%v", year, month, day))
@@ -48,7 +49,7 @@ func subscribeGymnasiums(month string, day string, start string, long int) (int,
 		return 0, "你选择的不是一个正常日期!"
 	}
 	url := "https://wx-api.papa.com.cn/v2"
-	reqBody := []byte("client_type=browser&sport_tag_id=8&date_str=2022-11-21&r=stadia.skuList&access_token_wx=661c3961c7688967c0ce0533926c8535")
+	reqBody := []byte(fmt.Sprintf("client_type=browser&sport_tag_id=8&date_str=%v-%v-%v&r=stadia.skuList&access_token_wx=661c3961c7688967c0ce0533926c8535", year, month, day))
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
 
 	req.Header.Add("Host", "wx-api.papa.com.cn")
@@ -79,33 +80,59 @@ func subscribeGymnasiums(month string, day string, start string, long int) (int,
 	}
 
 	// 解析选择时间是否有场地，可组合
-	result := switchContentEncoding(res)
-	return 1, fmt.Sprintf("%v", result)
-
+	gym := switchContentEncoding(res)
+	// 查看场地是否充足
+	msg, success := enough(gym, start, end)
+	if success {
+		return 1, fmt.Sprintf("%v", msg)
+	} else {
+		return 2, fmt.Sprintf("%v", fmt.Sprintf("您订阅的嘉体场地，%v月%v日 %v~%v 点的场地，其中部分场地空闲，详细信息如下：\n %v", month, day, start, end, msg))
+	}
 }
 
-func enough(gym Gym, start int, end int) string {
+/*
+*
+
+	查看场地是否充足
+	param: gym 场馆当天信息
+	param: start 预订开始时间 正常时间-8 9 10
+	param: end 预订结束时间 正常时间-9 10 11
+	return: string 可以预定的时间
+	return: bool 是否可以全部有场地
+
+*
+*/
+func enough(gym Gym, start int, end int) (string, bool) {
 	if start < 8 || start > 21 || start > end || end < 9 || end > 22 {
-		return ""
+		return "", false
 	}
 	// 0~13
 	skuList := gym.SkuList
+	// 20 22 -> 12 14
 	startInd, endInd := start-8, end-8
 
-	result := make(map[int]bool)
-	for i := 0; i < endInd-startInd; i++ {
-		result[start+i] = isEmpty(skuList[i])
+	result := make(map[int]groundInfo)
+	for i := startInd; i < endInd; i++ {
+		result[i] = isEmpty(skuList[i])
 	}
+
+	// 预订的时间是否都有场地
+	var enough bool = true
 
 	var builder strings.Builder
 	for key := range result {
-		if result[key] {
-			fmt.Fprint(&builder, fmt.Sprintf("%v点~%v点  场地空闲~\n", key, key+1))
+		if result[key].free {
+			fmt.Fprint(&builder, fmt.Sprintf("%v点~%v点", key+8, key+9))
+			for num := range result[key].number {
+				fmt.Fprint(&builder, fmt.Sprintf("室外%v号场地空闲~\n", num-1))
+			}
+		} else {
+			enough = false
 		}
 	}
 
 	// 这里不会报空指针
-	return builder.String()
+	return builder.String(), enough
 }
 
 /*
@@ -116,14 +143,24 @@ func enough(gym Gym, start int, end int) string {
 
 *
 */
-func isEmpty(sku []Sku) bool {
+func isEmpty(sku []Sku) groundInfo {
+	var groundInfo groundInfo
+	groundInfo.free = false
+
 	for i := 2; i < 6; i++ {
 		// 场地没有被锁定
 		if !sku[i].IsLock {
-			return true
+			groundInfo.free = true
+			// append 好像有点问题
+			groundInfo.number = append(groundInfo.number, i)
 		}
 	}
-	return false
+	return groundInfo
+}
+
+type groundInfo struct {
+	free   bool
+	number []int
 }
 
 /*
@@ -160,7 +197,7 @@ func switchContentEncoding(res *http.Response) Gym {
 		break
 	}
 	body, err := ioutil.ReadAll(bodyReader)
-	// fmt.Println("body:" + string(body))
+	fmt.Println("场馆信息：" + string(body))
 	if err == nil {
 		json.Unmarshal([]byte(body), &gymStr)
 	}

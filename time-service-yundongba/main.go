@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 func main() {
 	// router := gin.Default()
@@ -12,16 +9,8 @@ func main() {
 	// router.GET("/coupon/rob/:token/:amount", robCoupon)
 	// router.Run("localhost:8080")
 	// couponClock("09", 30, "token")
-	// subscribeGymnasiums("", "", "")
-	// _, e := time.Parse("2006-01-02", "2022-11-33")
-	// if e != nil {
-	// 	fmt.Println(e.Error())
-	// } else {
-	// 	fmt.Println("OK")
-	// }
-
-	var builder strings.Builder
-	fmt.Println(builder.String())
+	int, str := subscribeGymnasiums("11", "09", 10, 22)
+	fmt.Printf("code: %v, msg: %v", int, str)
 	// var gym gym
 	// gymmap := make(map[string]string)
 	// str := `{"v":"v2","r":"stadia.skuList"}`
