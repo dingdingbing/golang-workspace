@@ -18,4 +18,15 @@ func main() {
 	// json.Unmarshal([]byte(str), &gymmap)
 	// fmt.Println(gym)
 	// fmt.Println(gymmap)
+	// test 数组添加
+	// var groundInfo groundInfo
+	// groundInfo.free = false
+	// groundInfo.number = append(groundInfo.number, 2)
+	// groundInfo.number = append(groundInfo.number, 2)
+	// groundInfo.number = append(groundInfo.number, 2)
+	// groundInfo.number = append(groundInfo.number, 2)
+
+	// for _, value := range groundInfo.number {
+	// 	fmt.Println(value)
+	// }
 }

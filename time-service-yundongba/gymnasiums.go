@@ -86,7 +86,7 @@ func subscribeGymnasiums(month string, day string, start int, end int) (int, str
 	if success {
 		return 1, fmt.Sprintf("%v", msg)
 	} else {
-		return 2, fmt.Sprintf("%v", fmt.Sprintf("您订阅的嘉体场地，%v月%v日 %v~%v 点的场地，其中部分场地空闲，详细信息如下：\n %v", month, day, start, end, msg))
+		return 2, fmt.Sprintf("%v", fmt.Sprintf("您订阅的嘉体场地，%v月%v日 %v~%v 点的场地，其中部分场地空闲，详细信息如下:\n%v", month, day, start, end, msg))
 	}
 }
 
@@ -122,10 +122,12 @@ func enough(gym Gym, start int, end int) (string, bool) {
 	var builder strings.Builder
 	for key := range result {
 		if result[key].free {
-			fmt.Fprint(&builder, fmt.Sprintf("%v点~%v点", key+8, key+9))
-			for num := range result[key].number {
-				fmt.Fprint(&builder, fmt.Sprintf("室外%v号场地空闲~\n", num-1))
+			fmt.Fprint(&builder, fmt.Sprintf("%v点~%v点, 室外", key+8, key+9))
+			for _, val := range result[key].number {
+				fmt.Fprint(&builder, fmt.Sprintf("%v,", val-1))
 			}
+			fmt.Fprint(&builder, fmt.Sprintf("号场地空闲~\n"))
+
 		} else {
 			enough = false
 		}
