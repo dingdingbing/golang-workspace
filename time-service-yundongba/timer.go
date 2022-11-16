@@ -49,6 +49,7 @@ const (
 */
 func send(period string, price int, accessToken string) bool {
 
+	fmt.Println("step 1")
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 
 	// 消费券code 不变
@@ -75,23 +76,29 @@ func send(period string, price int, accessToken string) bool {
 		panic(err)
 	}
 	defer res.Body.Close()
+	fmt.Println("step 2")
+	result := transformation(res)
+	fmt.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
 	switch res.StatusCode {
 	case http.StatusOK:
+		fmt.Println("step 3")
 		noticeMasterPhone(title, message)
 		return true
 	case http.StatusUnauthorized:
+		fmt.Println("step 4")
 		title, message = "很遗憾！-2", "当前用户token已经过期"
 		break
 	case http.StatusServiceUnavailable:
+		// 503 也不断重试
+		fmt.Println("step 5")
 		title, message = "很遗憾没抢到", "券没啦~看来你的sleep时间还得短一点"
-		return true
 	default:
-		result := transformation(res)
-		fmt.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
+		fmt.Println("step 6")
 		title, message = "很遗憾！-3", fmt.Sprintf("错误，请检查代码, status: %d, response: %v", res.StatusCode, result["msg"])
 		break
 	}
-
+	fmt.Println(title)
+	fmt.Println(message)
 	noticeMasterPhone(title, message)
 	return false
 }

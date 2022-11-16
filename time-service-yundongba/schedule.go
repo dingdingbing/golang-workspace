@@ -48,7 +48,7 @@ func couponClock(period string, amount int, accessToken string) {
 				break
 			}
 			// sleep 10ms 尝试
-			time.Sleep(time.Millisecond * 10)
+			// time.Sleep(time.Millisecond * 10)
 		}
 	})
 	c.Start()

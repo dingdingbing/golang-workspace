@@ -53,8 +53,9 @@ func testReturn(c *gin.Context) {
 	amount := c.Param("amount")
 	int, err := strconv.Atoi(amount)
 	if err != nil {
-		c.IndentedJSON(http.StatusOK, "error, amount非int类型")
+		int = 30
 	}
-	fmt.Println("看看能不能走到这里~")
-	c.IndentedJSON(http.StatusOK, int)
+	accessToken := c.Param("token")
+	fmt.Println("step finish")
+	c.IndentedJSON(http.StatusOK, send("12", int, accessToken))
 }

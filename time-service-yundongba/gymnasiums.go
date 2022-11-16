@@ -49,7 +49,7 @@ func subscribeGymnasiums(month string, day string, start int, end int) (int, str
 		return 0, "你选择的不是一个正常日期!"
 	}
 	url := "https://wx-api.papa.com.cn/v2"
-	reqBody := []byte(fmt.Sprintf("client_type=browser&sport_tag_id=8&date_str=%v-%v-%v&r=stadia.skuList&access_token_wx=661c3961c7688967c0ce0533926c8535", year, month, day))
+	reqBody := []byte(fmt.Sprintf("client_type=browser&sport_tag_id=8&date_str=%v-%v-%v&r=stadia.skuList&access_token_wx=f9a2b8eebdac0ab1737990362d2f601c", year, month, day))
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
 
 	req.Header.Add("Host", "wx-api.papa.com.cn")
@@ -84,8 +84,11 @@ func subscribeGymnasiums(month string, day string, start int, end int) (int, str
 	// 查看场地是否充足
 	msg, success := enough(gym, start, end)
 	if success {
-		return 1, fmt.Sprintf("%v", msg)
+		return 1, fmt.Sprintf("%v月%v日 %v~%v 点的嘉体场地空闲 ！\n (*^_^*) \n前去预订场地,本次订阅结束，感谢支持，详细信息如下：\n %v", month, day, start, end, msg)
 	} else {
+		if msg == "" {
+			return 0, "订阅的时间区间暂无场地可供预定~(；′⌒`)"
+		}
 		return 2, fmt.Sprintf("%v", fmt.Sprintf("您订阅的嘉体场地，%v月%v日 %v~%v 点的场地，其中部分场地空闲，详细信息如下:\n%v", month, day, start, end, msg))
 	}
 }
@@ -114,6 +117,10 @@ func enough(gym Gym, start int, end int) (string, bool) {
 	result := make(map[int]groundInfo)
 	for i := startInd; i < endInd; i++ {
 		result[i] = isEmpty(skuList[i])
+	}
+
+	if len(result) == 0 {
+		return "", false
 	}
 
 	// 预订的时间是否都有场地

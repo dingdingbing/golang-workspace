@@ -1,16 +1,16 @@
 package main
 
-import "fmt"
+import "github.com/gin-gonic/gin"
 
 func main() {
-	// router := gin.Default()
-	// router.GET("/coupon/auth/:token", checkAuth)
-	// router.GET("/coupon/auth/:amount", testReturn)
-	// router.GET("/coupon/rob/:token/:amount", robCoupon)
-	// router.Run("localhost:8080")
+	router := gin.Default()
+	router.GET("/coupon/auth/:token", checkAuth)
+	router.GET("/coupon/test/:token/:amount", testReturn)
+	router.GET("/coupon/rob/:token/:amount", robCoupon)
+	router.Run("localhost:8080")
 	// couponClock("09", 30, "token")
-	int, str := subscribeGymnasiums("11", "09", 10, 22)
-	fmt.Printf("code: %v, msg: %v", int, str)
+	// int, str := subscribeGymnasiums("11", "13", 14, 18)
+	// fmt.Printf("code: %v, msg: %v", int, str)
 	// var gym gym
 	// gymmap := make(map[string]string)
 	// str := `{"v":"v2","r":"stadia.skuList"}`
