@@ -181,6 +181,7 @@ func transformation(response *http.Response) map[string]string {
 	if err == nil {
 		json.Unmarshal([]byte(string(body)), &result)
 	}
+	fmt.Printf("查看http请求返回结果：%v", result)
 	return result
 }
 
