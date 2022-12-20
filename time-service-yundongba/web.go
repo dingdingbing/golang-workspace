@@ -55,7 +55,8 @@ func testReturn(c *gin.Context) {
 	if err != nil {
 		int = 30
 	}
+	s, err := getStockId(int)
 	accessToken := c.Param("token")
 	fmt.Println("step finish")
-	c.IndentedJSON(http.StatusOK, send("12", int, accessToken))
+	c.IndentedJSON(http.StatusOK, send("12", s, accessToken))
 }

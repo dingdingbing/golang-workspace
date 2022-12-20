@@ -39,10 +39,20 @@ func couponClock(period string, amount int, accessToken string) {
 	fmt.Println(spec)
 	var i int = 0
 
+	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
+	// 消费券code 不变
+	stockId, err := getStockId(amount)
+	if err != nil {
+		title, message = "很遗憾！-1", err.Error()
+		// send bark to phone
+		noticeMasterPhone(title, message)
+		return
+	}
+
 	c.AddFunc(spec, func() {
 		// 尝试三次 测试成功
 		for {
-			flag := send(period, amount, accessToken)
+			flag := send(period, stockId, accessToken)
 			i++
 			if flag || i > 10 {
 				break

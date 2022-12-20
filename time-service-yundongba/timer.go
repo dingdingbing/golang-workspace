@@ -47,19 +47,8 @@ const (
 
 *
 */
-func send(period string, price int, accessToken string) bool {
+func send(period string, stockId string, accessToken string) bool {
 
-	fmt.Println("step 1")
-	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
-
-	// 消费券code 不变
-	stockId, err := getStockId(price)
-	if err != nil {
-		title, message = "很遗憾！-1", err.Error()
-		// send bark to phone
-		noticeMasterPhone(title, message)
-		return false
-	}
 	url := "https://mapv2.51yundong.me/api/coupon/coupons/send?stockId=" + stockId + "&time=" + period + "%3A00"
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -72,6 +61,8 @@ func send(period string, price int, accessToken string) bool {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := http.DefaultClient.Do(req)
+	fmt.Println("step 1")
+	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	if err != nil {
 		panic(err)
 	}
