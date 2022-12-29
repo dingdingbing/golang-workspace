@@ -1,32 +1,32 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+)
 
 func main() {
+	log.SetLevel(log.InfoLevel)
+	log.Trace("trace")
+	log.Debug("debug")
+	log.Info("info")
+	log.Warn("warn")
+	log.Error("error")
 	router := gin.Default()
+	router.SetTrustedProxies([]string{"122.51.126.249"})
 	router.GET("/coupon/auth/:token", checkAuth)
 	router.GET("/coupon/test/:token/:amount", testReturn)
 	router.GET("/coupon/rob/:token/:amount", robCoupon)
-	router.Run("localhost:8080")
-	// couponClock("09", 30, "token")
-	// int, str := subscribeGymnasiums("11", "13", 14, 18)
-	// fmt.Printf("code: %v, msg: %v", int, str)
-	// var gym gym
-	// gymmap := make(map[string]string)
-	// str := `{"v":"v2","r":"stadia.skuList"}`
-	// json.Unmarshal([]byte(str), &gym)
-	// json.Unmarshal([]byte(str), &gymmap)
-	// fmt.Println(gym)
-	// fmt.Println(gymmap)
-	// test 数组添加
-	// var groundInfo groundInfo
-	// groundInfo.free = false
-	// groundInfo.number = append(groundInfo.number, 2)
-	// groundInfo.number = append(groundInfo.number, 2)
-	// groundInfo.number = append(groundInfo.number, 2)
-	// groundInfo.number = append(groundInfo.number, 2)
-
-	// for _, value := range groundInfo.number {
-	// 	fmt.Println(value)
-	// }
+	router.GET("/", func(c *gin.Context) {
+		// If the client is 192.168.1.2, use the X-Forwarded-For
+		// header to deduce the original client IP from the trust-
+		// worthy parts of that header.
+		// Otherwise, simply return the direct client IP
+		fmt.Printf("ClientIP: %s\n", c.ClientIP())
+	})
+	router.GET("/wx", WXCheckSignature)
+	router.POST("/wx", WXMsgReceive)
+	router.Run(":80")
 }
