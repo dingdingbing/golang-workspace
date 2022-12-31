@@ -49,8 +49,9 @@ func WXMsgReceive(c *gin.Context) {
 
 	var returnContent string
 	if bool {
-		split := strings.Split(content, "+")
-		returnContent = checkAndRob(split[0], split[1])
+		// Bearer 702af673-d508-4fa6-9ddd-f93944b07c4b+80
+		split := strings.Split(content[7:], "+")
+		returnContent = checkAndRob(split[1], split[0])
 	} else {
 		returnContent = "您的输入的格式不正确，请重新整理后再试！"
 	}
@@ -87,15 +88,22 @@ func checkAndRob(amount string, accessToken string) string {
 	year := now.Format("2006")
 	month := now.Format("01")
 	day := now.Format("02")
-	// 有效期时间
-	efficientTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, periodInt-2), location)
-	if now.Before(efficientTime) {
-		returnMsg = fmt.Sprintf("将为您抢券的时间是:%v,现在的时间是：%v,不在token的有效期内,请详细阅读抢券手册再重新发起抢券请求", period, now.Format(Layout))
+	// 有效期时间 - 抢券前两小时
+	efficientStartTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, periodInt-2), location)
+
+	if now.Before(efficientStartTime) {
+		returnMsg = fmt.Sprintf("将为您抢券的时间是:%v点整\n现在的时间是：%v\n不在token的有效期内\n请详细阅读抢券手册再重新发起抢券请求", period, now.Format(Layout))
+		return returnMsg
+	}
+
+	efficientEndTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:01:00", year, month, day, periodInt), location)
+	if now.After(efficientEndTime) {
+		returnMsg = fmt.Sprintf("将为您抢券的时间是:%v点整\n现在的时间是：%v\n抢券已经开始超过1分钟\n不提供这种无意义的抢券服务\n请详细阅读抢券手册再重新发起抢券请求", period, now.Format(Layout))
 		return returnMsg
 	}
 
 	err := getStock(period, accessToken)
-	if err == nil {
+	if err != nil {
 		return err.Error()
 	} else {
 		returnMsg = fmt.Sprintf("恭喜您,当前token有效!将于今日%v点整为您抢%v元消费券", period, amount)
