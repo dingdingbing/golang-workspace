@@ -4,16 +4,9 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	log.SetLevel(log.InfoLevel)
-	log.Trace("trace")
-	log.Debug("debug")
-	log.Info("info")
-	log.Warn("warn")
-	log.Error("error")
 	router := gin.Default()
 	router.SetTrustedProxies([]string{"122.51.126.249"})
 	router.GET("/coupon/auth/:token", checkAuth)
