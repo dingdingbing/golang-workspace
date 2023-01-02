@@ -115,6 +115,14 @@ func checkAndRob(amount string, accessToken string) string {
 		int = 30
 	}
 
-	couponClock(period, int, accessToken)
+	waitGroup.Add(1)
+	go asyncCoupon(period, int, accessToken)
+	waitGroup.Wait()
+
 	return returnMsg
+}
+
+func asyncCoupon(period string, amount int, accessToken string) {
+	couponClock(period, amount, accessToken)
+	waitGroup.Done()
 }
