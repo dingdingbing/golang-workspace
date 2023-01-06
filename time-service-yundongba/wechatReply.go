@@ -47,16 +47,16 @@ func WXMsgReceive(c *gin.Context) {
 
 	bool, _ := regexp.MatchString("Bearer [a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\\+[1-8]0$", content)
 
-	var returnContent string
 	if bool {
 		// Bearer 702af673-d508-4fa6-9ddd-f93944b07c4b+80
 		split := strings.Split(content[7:], "+")
-		returnContent = checkAndRob(split[1], split[0])
+		checkAndRob(split[1], split[0], c, textMsg.ToUserName, textMsg.FromUserName)
 	} else {
-		returnContent = "您的输入的格式不正确，请重新整理后再试！"
+		returnContent := "您的输入的格式不正确，请重新整理后再试！"
+		// 对接收的消息进行被动回复
+		WXMsgReply(c, textMsg.ToUserName, textMsg.FromUserName, returnContent)
 	}
-	// 对接收的消息进行被动回复
-	WXMsgReply(c, textMsg.ToUserName, textMsg.FromUserName, returnContent)
+
 }
 
 // WXMsgReply 微信消息回复
@@ -77,34 +77,43 @@ func WXMsgReply(c *gin.Context, fromUser string, toUser string, content string) 
 	_, _ = c.Writer.Write(msg)
 }
 
-func checkAndRob(amount string, accessToken string) string {
+func checkAndRob(amount string, accessToken string, c *gin.Context, fromUser string, toUser string) {
 	var returnMsg string
 	// 获取抢券时间段
 	period := getPeriodTime()
-	periodInt, _ := strconv.Atoi(period)
 	// 对比当前时间和抢券时间，确保在token的两个小时以内
 	location, _ := time.LoadLocation("Asia/Shanghai")
 	now := time.Now()
 	year := now.Format("2006")
 	month := now.Format("01")
 	day := now.Format("02")
+
+	// 抢券时间
+	robTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, period), location)
+	sub2hours, _ := time.ParseDuration("-2h")
 	// 有效期时间 - 抢券前两小时
-	efficientStartTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, periodInt-2), location)
+	efficientStartTime := robTime.Add(sub2hours)
 
 	if now.Before(efficientStartTime) {
 		returnMsg = fmt.Sprintf("将为您抢券的时间是:%v点整\n现在的时间是：%v\n不在token的有效期内\n请详细阅读抢券手册再重新发起抢券请求", period, now.Format(Layout))
-		return returnMsg
+		WXMsgReply(c, fromUser, toUser, returnMsg)
+		return
 	}
 
-	efficientEndTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:01:00", year, month, day, periodInt), location)
+	// 有效期时间 - 抢券开始后1分钟
+	add1min, _ := time.ParseDuration("1m")
+	efficientEndTime := robTime.Add(add1min)
 	if now.After(efficientEndTime) {
 		returnMsg = fmt.Sprintf("将为您抢券的时间是:%v点整\n现在的时间是：%v\n抢券已经开始超过1分钟\n不提供这种无意义的抢券服务\n请详细阅读抢券手册再重新发起抢券请求", period, now.Format(Layout))
-		return returnMsg
+		WXMsgReply(c, fromUser, toUser, returnMsg)
+		return
 	}
 
 	err := getStock(period, accessToken)
 	if err != nil {
-		return err.Error()
+		returnMsg = err.Error()
+		WXMsgReply(c, fromUser, toUser, returnMsg)
+		return
 	} else {
 		returnMsg = fmt.Sprintf("恭喜您,当前token有效!将于今日%v点整为您抢%v元消费券", period, amount)
 	}
@@ -117,9 +126,9 @@ func checkAndRob(amount string, accessToken string) string {
 
 	waitGroup.Add(1)
 	go asyncCoupon(period, int, accessToken)
+	// 对接收的消息进行被动回复
+	WXMsgReply(c, fromUser, toUser, returnMsg)
 	waitGroup.Wait()
-
-	return returnMsg
 }
 
 func asyncCoupon(period string, amount int, accessToken string) {

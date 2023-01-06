@@ -78,11 +78,12 @@ func send(period string, stockId string, accessToken string) bool {
 	case http.StatusUnauthorized:
 		fmt.Println("step 4")
 		title, message = "很遗憾！-2", "当前用户token已经过期"
-		break
+		noticeMasterPhone(title, message)
+		return true
 	case http.StatusServiceUnavailable:
 		// 503 也不断重试
 		fmt.Println("step 5")
-		title, message = "很遗憾没抢到", "券没啦~看来你的sleep时间还得短一点"
+		title, message = "警告警告~", "他们的服务器挂啦，我继续重试"
 	default:
 		fmt.Println("step 6")
 		title, message = "很遗憾！-3", fmt.Sprintf("错误，请检查代码, status: %d, response: %v", res.StatusCode, result["msg"])
