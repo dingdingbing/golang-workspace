@@ -37,7 +37,6 @@ func couponClock(period string, amount int, accessToken string) {
 	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
 	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
 	fmt.Println(spec)
-	var i int = 0
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	// 消费券code 不变
@@ -51,14 +50,11 @@ func couponClock(period string, amount int, accessToken string) {
 
 	c.AddFunc(spec, func() {
 		// 尝试三次 测试成功
-		for {
+		for i := 0; i < 3; i++ {
 			flag := send(period, stockId, accessToken)
-			i++
-			if flag || i > 10 {
+			if flag {
 				break
 			}
-			// sleep 10ms 尝试
-			// time.Sleep(time.Millisecond * 10)
 		}
 	})
 	c.Start()

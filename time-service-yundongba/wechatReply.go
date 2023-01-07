@@ -43,7 +43,7 @@ func WXMsgReceive(c *gin.Context) {
 	}
 
 	content := textMsg.Content
-	log.Printf("[消息接收] - 收到消息, 消息类型为: %s, 消息内容为: %s\n", textMsg.MsgType, content)
+	log.Printf("[消息接收] - 收到消息, 发送消息方：%s, 接受消息方：%s, 消息类型为: %s, 消息内容为: %s\n", textMsg.FromUserName, textMsg.ToUserName, textMsg.MsgType, content)
 
 	bool, _ := regexp.MatchString("Bearer [a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\\+[1-8]0$", content)
 
@@ -124,14 +124,14 @@ func checkAndRob(amount string, accessToken string, c *gin.Context, fromUser str
 		int = 30
 	}
 
-	waitGroup.Add(1)
-	go asyncCoupon(period, int, accessToken)
 	// 对接收的消息进行被动回复
 	WXMsgReply(c, fromUser, toUser, returnMsg)
-	waitGroup.Wait()
-}
 
-func asyncCoupon(period string, amount int, accessToken string) {
-	couponClock(period, amount, accessToken)
-	waitGroup.Done()
+	robStruct := RobStruct{
+		period:      period,
+		amount:      int,
+		accessToken: accessToken,
+	}
+	robMap[fromUser] = robStruct
+
 }
