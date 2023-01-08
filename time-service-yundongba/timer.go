@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 )
@@ -61,36 +62,35 @@ func send(period string, stockId string, accessToken string) bool {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := http.DefaultClient.Do(req)
-	fmt.Println("step 1")
+	log.Println("step 1")
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	if err != nil {
 		panic(err)
 	}
 	defer res.Body.Close()
-	fmt.Println("step 2")
+	log.Println("step 2")
 	result := transformation(res)
-	fmt.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
+	log.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
 	switch res.StatusCode {
 	case http.StatusOK:
-		fmt.Println("step 3")
+		log.Println("step 3")
 		noticeMasterPhone(title, message)
 		return true
 	case http.StatusUnauthorized:
-		fmt.Println("step 4")
+		log.Println("step 4")
 		title, message = "很遗憾！-2", "当前用户token已经过期"
 		noticeMasterPhone(title, message)
 		return true
 	case http.StatusServiceUnavailable:
 		// 503 也不断重试
-		fmt.Println("step 5")
-		title, message = "警告警告~", "他们的服务器挂啦，我继续重试"
+		log.Println("step 5")
+		title, message = "警告警告~503 ERROR", fmt.Sprintf("他们的服务器挂啦，我继续重试, reason:%v", result["msg"])
 	default:
-		fmt.Println("step 6")
+		log.Println("step 6")
 		title, message = "很遗憾！-3", fmt.Sprintf("错误，请检查代码, status: %d, response: %v", res.StatusCode, result["msg"])
 		break
 	}
-	fmt.Println(title)
-	fmt.Println(message)
+	log.Println(title, message)
 	noticeMasterPhone(title, message)
 	return false
 }
@@ -127,8 +127,8 @@ func getStock(period string, accessToken string) error {
 	}
 	defer res.Body.Close()
 
-	body, _ := ioutil.ReadAll(res.Body)
-	fmt.Printf("result res:%v, body:%v", res.StatusCode, string(body))
+	// body, _ := ioutil.ReadAll(res.Body)
+	// fmt.Printf("result res:%v, body:%v", res.StatusCode, string(body))
 	switch res.StatusCode {
 	case http.StatusOK:
 		return nil
@@ -173,7 +173,7 @@ func transformation(response *http.Response) map[string]string {
 	if err == nil {
 		json.Unmarshal([]byte(string(body)), &result)
 	}
-	fmt.Printf("查看http请求返回结果：%v", result)
+	log.Printf("查看http请求返回结果：%v", result)
 	return result
 }
 
@@ -189,11 +189,11 @@ func getPeriodTime() string {
 	day := now.Format("02")
 
 	morning, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v 08:00:00", year, month, day), location)
-	// fmt.Println(morning)
+	// log.Println(morning)
 	noon, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v 12:00:00", year, month, day), location)
-	// fmt.Println(noon)
+	// log.Println(noon)
 	night, _ := time.ParseInLocation("2006-01-02 15:04:05", fmt.Sprintf("%v-%v-%v 18:00:00", year, month, day), location)
-	// fmt.Println(night)
+	// log.Println(night)
 
 	if now.Before(morning) {
 		return "08"

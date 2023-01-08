@@ -20,5 +20,6 @@ func main() {
 	router.GET("/wx", WXCheckSignature)
 	router.POST("/wx", WXMsgReceive)
 	router.Run(":9000")
+	initDaily()
 
 }
