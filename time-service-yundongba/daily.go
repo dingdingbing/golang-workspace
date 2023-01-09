@@ -4,29 +4,36 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/robfig/cron/v3"
 )
-
-var waitGroup sync.WaitGroup
 
 func initDaily() {
 	log.Println("init start")
 	c := cron.New(cron.WithSeconds())
 
 	// 每天抢券前30秒核对是否有人发起了请求
-	spec := fmt.Sprintf("30 59 7 * * ? *")
+	spec := fmt.Sprintf("30 59 7 * * ?")
 	c.AddFunc(spec, everyDayEightoClock)
 
-	spec = fmt.Sprintf("30 59 11 * * ? *")
+	spec = fmt.Sprintf("30 59 11 * * ?")
 	c.AddFunc(spec, everyDayTwelveoClock)
 
-	spec = fmt.Sprintf("30 59 17 * * ? *")
+	spec = fmt.Sprintf("30 59 17 * * ?")
 	c.AddFunc(spec, everyDaySeventeenoClock)
 
+	spec = fmt.Sprintf("00 * * * * ?")
+	c.AddFunc(spec,
+		func() {
+			log.Println("系统功能正常！")
+		})
 	log.Println("init end")
+
+	c.Start()
+	defer c.Stop()
+
+	select {}
 }
 
 func everyDayEightoClock() {
