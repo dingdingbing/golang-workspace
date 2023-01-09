@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -36,7 +37,7 @@ func couponClock(period string, amount int, accessToken string) {
 	// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
 	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
 	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
-	fmt.Println(spec)
+	log.Println(spec)
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	// 消费券code 不变
@@ -69,7 +70,7 @@ func couponClock(period string, amount int, accessToken string) {
 	// 在任务结束的5分钟后结束定时任务 测试通过
 	for {
 		if time.Now().After(closeTime) {
-			fmt.Println("结束！")
+			log.Println("结束！")
 			break
 		}
 	}
