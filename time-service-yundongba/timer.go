@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 )
@@ -48,6 +49,7 @@ const (
 *
 */
 func send(period string, stockId string, accessToken string) bool {
+	log.Println(time.Now(), "post start")
 
 	url := "https://mapv2.51yundong.me/api/coupon/coupons/send?stockId=" + stockId + "&time=" + period + "%3A00"
 	req, _ := http.NewRequest("GET", url, nil)
@@ -61,32 +63,32 @@ func send(period string, stockId string, accessToken string) bool {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := http.DefaultClient.Do(req)
-	fmt.Println(time.Now(), " post over")
-	fmt.Println("step 1")
+	log.Println(time.Now(), " post over")
+	log.Println("step 1")
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	if err != nil {
 		panic(err)
 	}
 	defer res.Body.Close()
-	fmt.Println("step 2")
+	log.Println("step 2")
 	result := transformation(res)
 	fmt.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
 	switch res.StatusCode {
 	case http.StatusOK:
-		fmt.Println("step 3")
+		log.Println("step 3")
 		noticeMasterPhone(title, message)
 		return true
 	case http.StatusUnauthorized:
-		fmt.Println("step 4")
+		log.Println("step 4")
 		title, message = "很遗憾！-2", "当前用户token已经过期"
 		noticeMasterPhone(title, message)
 		return true
 	case http.StatusServiceUnavailable:
 		// 503 也不断重试
-		fmt.Println("step 5")
-		title, message = "警告警告~", "他们的服务器挂啦，我继续重试"
+		log.Println("step 5")
+		title, message = "警告警告~", result["msg"]
 	default:
-		fmt.Println("step 6")
+		log.Println("step 6")
 		title, message = "很遗憾！-3", fmt.Sprintf("错误，请检查代码, status: %d, response: %v", res.StatusCode, result["msg"])
 		break
 	}

@@ -49,10 +49,14 @@ func couponClock(period string, amount int, accessToken string) {
 		return
 	}
 
+	log.Println("what time is it now ? ", time.Now())
+
 	c.AddFunc(spec, func() {
 		// 尝试三次 测试成功
 		for i := 0; i < 3; i++ {
+			log.Println("before send time : ", time.Now())
 			flag := send(period, stockId, accessToken)
+			log.Println("after send time : ", time.Now())
 			if flag {
 				break
 			}
