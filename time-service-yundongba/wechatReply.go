@@ -132,6 +132,6 @@ func checkAndRob(amount string, accessToken string, c *gin.Context, fromUser str
 		amount:      int,
 		accessToken: accessToken,
 	}
-	robMap[fromUser] = robStruct
+	robMap[toUser] = robStruct
 
 }

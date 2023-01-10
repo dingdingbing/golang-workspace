@@ -23,7 +23,7 @@ func initDaily() {
 	spec = fmt.Sprintf("30 59 17 * * ?")
 	c.AddFunc(spec, everyDaySeventeenoClock)
 
-	spec = fmt.Sprintf("00 * * * * ?")
+	spec = fmt.Sprintf("00 00 * * * ?")
 	c.AddFunc(spec,
 		func() {
 			log.Println("系统功能正常！")
@@ -62,7 +62,7 @@ func everyDayEightoClock() {
 }
 
 func asyncCouponClock(robStruct RobStruct) {
-	log.Println("start asyncCouponClock for ", robStruct)
+	log.Println("start asyncCouponClock for ", robStruct, time.Now())
 	couponClock(robStruct.period, robStruct.amount, robStruct.accessToken)
 	waitGroup.Done()
 }

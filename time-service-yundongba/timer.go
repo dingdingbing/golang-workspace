@@ -61,6 +61,7 @@ func send(period string, stockId string, accessToken string) bool {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := http.DefaultClient.Do(req)
+	fmt.Println(time.Now(), " post over")
 	fmt.Println("step 1")
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	if err != nil {
@@ -127,8 +128,8 @@ func getStock(period string, accessToken string) error {
 	}
 	defer res.Body.Close()
 
-	body, _ := ioutil.ReadAll(res.Body)
-	fmt.Printf("result res:%v, body:%v", res.StatusCode, string(body))
+	// body, _ := ioutil.ReadAll(res.Body)
+	// fmt.Printf("result res:%v, body:%v", res.StatusCode, string(body))
 	switch res.StatusCode {
 	case http.StatusOK:
 		return nil
