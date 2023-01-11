@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -34,9 +35,11 @@ func couponClock(period string, amount int, accessToken string) {
 	// 关闭程序时间，以免造成资源浪费
 	closeTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:01:00", year, month, day, period), location)
 
+	p, _ := strconv.Atoi(period)
 	// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
 	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
-	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
+	// 提前一秒钟执行，定时任务会在前500ms内发送请求
+	spec := fmt.Sprintf("59 59 %v %v %v ?", p-1, day, month)
 	log.Println(spec)
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
@@ -51,9 +54,19 @@ func couponClock(period string, amount int, accessToken string) {
 
 	log.Println("what time is it now ? ", time.Now())
 
+	// 抢券前500ms
+	robTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, period), location)
+	fiveMs, _ := time.ParseDuration("-300ms")
+	preTime := robTime.Add(fiveMs)
 	c.AddFunc(spec, func() {
-		// 尝试三次 测试成功
-		for i := 0; i < 3; i++ {
+		// 提前500ms发起请求
+		for {
+			if time.Now().After(preTime) {
+				break
+			}
+		}
+		// 尝试 10 次 测试成功
+		for i := 0; i < 10; i++ {
 			log.Println("before send time : ", time.Now())
 			flag := send(period, stockId, accessToken)
 			log.Println("after send time : ", time.Now())
