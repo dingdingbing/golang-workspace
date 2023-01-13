@@ -56,7 +56,7 @@ func couponClock(period string, amount int, accessToken string) {
 
 	// 抢券前500ms
 	robTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, period), location)
-	fiveMs, _ := time.ParseDuration("-300ms")
+	fiveMs, _ := time.ParseDuration("-100ms")
 	preTime := robTime.Add(fiveMs)
 	c.AddFunc(spec, func() {
 		// 提前500ms发起请求
@@ -66,7 +66,7 @@ func couponClock(period string, amount int, accessToken string) {
 			}
 		}
 		// 尝试 10 次 测试成功
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 5; i++ {
 			log.Println("before send time : ", time.Now())
 			flag := send(period, stockId, accessToken)
 			log.Println("after send time : ", time.Now())

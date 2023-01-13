@@ -45,16 +45,21 @@ func WXMsgReceive(c *gin.Context) {
 	content := textMsg.Content
 	log.Printf("[消息接收] - 收到消息, 发送消息方：%s, 接受消息方：%s, 消息类型为: %s, 消息内容为: %s\n", textMsg.FromUserName, textMsg.ToUserName, textMsg.MsgType, content)
 
-	bool, _ := regexp.MatchString("Bearer [a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\\+[1-8]0$", content)
-
-	if bool {
-		// Bearer 702af673-d508-4fa6-9ddd-f93944b07c4b+80
-		split := strings.Split(content[7:], "+")
-		checkAndRob(split[1], split[0], c, textMsg.ToUserName, textMsg.FromUserName)
-	} else {
-		returnContent := "您的输入的格式不正确，请重新整理后再试！"
+	if textMsg.MsgType == "event" {
 		// 对接收的消息进行被动回复
-		WXMsgReply(c, textMsg.ToUserName, textMsg.FromUserName, returnContent)
+		WXMsgReply(c, textMsg.ToUserName, textMsg.FromUserName, "欢迎关注本公众号，使用规则请参照左下角“功能介绍;\n有任何疑问请点击“获取帮助”;\n如果本公众号给你带来了帮助也可以点击打赏表示您对本公众号的认可; \n如果给您带来任何困扰，请联系开发者~ 非常感谢")
+	} else {
+		bool, _ := regexp.MatchString("Bearer [a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}\\+[1-8]0$", content)
+
+		if bool {
+			// Bearer 702af673-d508-4fa6-9ddd-f93944b07c4b+80
+			split := strings.Split(content[7:], "+")
+			checkAndRob(split[1], split[0], c, textMsg.ToUserName, textMsg.FromUserName)
+		} else {
+			returnContent := "您的输入的格式不正确，请重新整理后再试！"
+			// 对接收的消息进行被动回复
+			WXMsgReply(c, textMsg.ToUserName, textMsg.FromUserName, returnContent)
+		}
 	}
 
 }
