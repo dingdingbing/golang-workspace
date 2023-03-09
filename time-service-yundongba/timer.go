@@ -63,7 +63,7 @@ func send(period string, stockId string, accessToken string) bool {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	res, err := http.DefaultClient.Do(req)
-	log.Println(time.Now(), " post over")
+	log.Println(time.Now(), " post over", accessToken)
 	log.Println("step 1")
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	if err != nil {
