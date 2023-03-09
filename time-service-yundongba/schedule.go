@@ -39,8 +39,10 @@ func couponClock(period string, amount int, accessToken string) {
 	// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
 	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
 	// 提前一秒钟执行，定时任务会在前500ms内发送请求
-	spec := fmt.Sprintf("00 00 %v %v %v ?", p, day, month)
-	log.Println(spec)
+	spec1 := fmt.Sprintf("00 00 %v %v %v ?", p, day, month)
+	spec2 := fmt.Sprintf("01 00 %v %v %v ?", p, day, month)
+	spec3 := fmt.Sprintf("02 00 %v %v %v ?", p, day, month)
+	log.Println(spec1, spec2, spec3)
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
 	// 消费券code 不变
@@ -54,27 +56,41 @@ func couponClock(period string, amount int, accessToken string) {
 
 	log.Println("what time is it now ? ", time.Now())
 
-	// 抢券前500ms
-	// robTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, period), location)
-	// fiveMs, _ := time.ParseDuration("10ms")
-	// preTime := robTime.Add(fiveMs)
-	c.AddFunc(spec, func() {
-		// 提前500ms发起请求
-		// for {
-		// 	if time.Now().After(preTime) {
-		// 		break
-		// 	}
-		// }
-		// 尝试 10 次 测试成功
-		for i := 0; i < 3; i++ {
-			log.Println("before send time : ", time.Now(), accessToken)
-			flag := send(period, stockId, accessToken)
-			log.Println("after send time : ", time.Now(), accessToken)
-			if flag {
-				break
+	// 80 50的券限制了每周一次，隔一秒抢一次，防止因为服务器挂了的缘故导致00发起的请求失败
+	if amount == 80 || amount == 50 {
+		c.AddFunc(spec1, func() {
+			send(period, stockId, accessToken)
+		})
+		c.AddFunc(spec2, func() {
+			send(period, stockId, accessToken)
+		})
+		c.AddFunc(spec3, func() {
+			send(period, stockId, accessToken)
+		})
+	} else {
+
+		// 抢券前500ms
+		// robTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, period), location)
+		// fiveMs, _ := time.ParseDuration("10ms")
+		// preTime := robTime.Add(fiveMs)
+		c.AddFunc(spec3, func() {
+			// 提前500ms发起请求
+			// for {
+			// 	if time.Now().After(preTime) {
+			// 		break
+			// 	}
+			// }
+			for i := 0; i < 3; i++ {
+				log.Println("before send time : ", time.Now(), accessToken)
+				flag := send(period, stockId, accessToken)
+				log.Println("after send time : ", time.Now(), accessToken)
+				if flag {
+					break
+				}
 			}
-		}
-	})
+		})
+	}
+
 	c.Start()
 	defer c.Stop()
 
