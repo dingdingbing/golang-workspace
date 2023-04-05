@@ -39,9 +39,9 @@ func couponClock(period string, amount int, accessToken string) {
 	// “2006-01-02 15:04:05”是Go语言的创建时间，且必须为这几个准确的数字。
 	// 指定时间执行，cron格式（秒，分，时，天，月，周）	spec := fmt.Sprintf("00 00 %v %v %v ?", period, day, month)
 	// 提前一秒钟执行，定时任务会在前500ms内发送请求
-	spec1 := fmt.Sprintf("00 00 %v %v %v ?", p, day, month)
-	spec2 := fmt.Sprintf("01 00 %v %v %v ?", p, day, month)
-	spec3 := fmt.Sprintf("02 00 %v %v %v ?", p, day, month)
+	spec1 := fmt.Sprintf("01 00 %v %v %v ?", p, day, month)
+	spec2 := fmt.Sprintf("03 00 %v %v %v ?", p, day, month)
+	spec3 := fmt.Sprintf("04 00 %v %v %v ?", p, day, month)
 	log.Println(spec1, spec2, spec3)
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
@@ -64,9 +64,9 @@ func couponClock(period string, amount int, accessToken string) {
 		c.AddFunc(spec2, func() {
 			send(period, stockId, accessToken)
 		})
-		c.AddFunc(spec3, func() {
-			send(period, stockId, accessToken)
-		})
+		// c.AddFunc(spec3, func() {
+		// 	send(period, stockId, accessToken)
+		// })
 	} else {
 
 		// 抢券前500ms
