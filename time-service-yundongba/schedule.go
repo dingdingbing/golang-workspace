@@ -41,7 +41,7 @@ func couponClock(period string, amount int, accessToken string) {
 	// 提前一秒钟执行，定时任务会在前500ms内发送请求
 	spec1 := fmt.Sprintf("01 00 %v %v %v ?", p, day, month)
 	spec2 := fmt.Sprintf("03 00 %v %v %v ?", p, day, month)
-	spec3 := fmt.Sprintf("04 00 %v %v %v ?", p, day, month)
+	spec3 := fmt.Sprintf("02 00 %v %v %v ?", p, day, month)
 	log.Println(spec1, spec2, spec3)
 
 	title, message := "恭喜你，抢券成功", "请前往健身地图核验是否到账~"
