@@ -50,6 +50,7 @@ const (
 */
 func send(period string, stockId string, accessToken string) bool {
 	log.Println(time.Now(), "post start")
+	time.Sleep(time.Millisecond * 500)
 
 	url := "https://mapv2.51yundong.me/api/coupon/coupons/send?stockId=" + stockId + "&time=" + period + "%3A00"
 	req, _ := http.NewRequest("GET", url, nil)
