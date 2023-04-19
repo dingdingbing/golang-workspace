@@ -56,7 +56,16 @@ func WXMsgReceive(c *gin.Context) {
 			split := strings.Split(content[7:], "+")
 			checkAndRob(split[1], split[0], c, textMsg.ToUserName, textMsg.FromUserName)
 		} else {
-			returnContent := "您的输入的格式不正确，请重新整理后再试！"
+			var returnContent string
+			bool, _ := regexp.MatchString("waitTime\\+[1-9]0{2,4}$", content)
+			if bool {
+				split := strings.Split(content, "+")
+				int, _ := strconv.ParseInt(split[1], 10, 64)
+				waitTime = int
+				returnContent = fmt.Sprintf("已经修改waitTime时间为：%d", waitTime)
+			} else {
+				returnContent = "您的输入的格式不正确，请重新整理后再试！"
+			}
 			// 对接收的消息进行被动回复
 			WXMsgReply(c, textMsg.ToUserName, textMsg.FromUserName, returnContent)
 		}

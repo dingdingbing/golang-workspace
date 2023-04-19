@@ -8,6 +8,7 @@ import (
 
 // key-> time value -> RobStruct
 var robMap map[string]RobStruct
+var waitTime int64 = 800
 
 type RobStruct struct {
 	period      string
