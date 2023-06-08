@@ -57,7 +57,7 @@ func WXMsgReceive(c *gin.Context) {
 			checkAndRob(split[1], split[0], c, textMsg.ToUserName, textMsg.FromUserName)
 		} else {
 			var returnContent string
-			bool, _ := regexp.MatchString("waitTime\\+[1-9]0{2,4}$", content)
+			bool, _ := regexp.MatchString("waitTime\\+[0-9]*$", content)
 			if bool {
 				split := strings.Split(content, "+")
 				int, _ := strconv.ParseInt(split[1], 10, 64)
