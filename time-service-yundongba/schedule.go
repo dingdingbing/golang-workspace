@@ -63,20 +63,11 @@ func couponClock(period string, amount int, accessToken string) {
 		})
 	} else {
 
-		// 抢券前500ms
-		// robTime, _ := time.ParseInLocation(Layout, fmt.Sprintf("%v-%v-%v %v:00:00", year, month, day, period), location)
-		// fiveMs, _ := time.ParseDuration("10ms")
-		// preTime := robTime.Add(fiveMs)
 		c.AddFunc(spec3, func() {
-			// 提前500ms发起请求
-			// for {
-			// 	if time.Now().After(preTime) {
-			// 		break
-			// 	}
-			// }
-			for i := 0; i < 3; i++ {
+			for i := 0; i < 8; i++ {
 				log.Println("before send time : ", time.Now(), accessToken)
 				flag := send(period, stockId, accessToken)
+				time.Sleep(time.Second * 2)
 				log.Println("after send time : ", time.Now(), accessToken)
 				if flag {
 					break
