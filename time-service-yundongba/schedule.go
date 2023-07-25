@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"strconv"
 	"time"
 
@@ -58,22 +57,30 @@ func couponClock(period string, amount int, accessToken string) {
 
 	// 80 50的券限制了每周一次，隔一秒抢一次，防止因为服务器挂了的缘故导致00发起的请求失败
 	if amount == 80 || amount == 50 {
-		c.AddFunc(spec1, func() {
+		_, err := c.AddFunc(spec1, func() {
 			send(period, stockId, accessToken)
 		})
+		if err != nil {
+			log.Println("定时任务启动失败！01")
+			return
+		}
 	} else {
 
-		c.AddFunc(spec3, func() {
+		_, err := c.AddFunc(spec3, func() {
 			for i := 0; i < 8; i++ {
 				log.Println("before send time : ", time.Now(), accessToken)
 				flag := send(period, stockId, accessToken)
-				time.Sleep(time.Second * 2)
+				time.Sleep(time.Millisecond * 500)
 				log.Println("after send time : ", time.Now(), accessToken)
 				if flag {
 					break
 				}
 			}
 		})
+		if err != nil {
+			log.Println("定时任务启动失败！02")
+			return
+		}
 	}
 
 	c.Start()
@@ -92,19 +99,4 @@ func couponClock(period string, amount int, accessToken string) {
 			break
 		}
 	}
-}
-
-/*
-*
-
-	随机返回true or false
-
-*
-*/
-func sendtest(hour string, price int, accessToken string) bool {
-	num := rand.Float32()
-	flag := num < 0.5
-	fmt.Printf("now: %v, hour: %v,flag: %v, num:%v", time.Now(), hour, flag, num)
-	noticeMasterPhone("测试定时任务", fmt.Sprintf("准点测试时间%v", time.Now()))
-	return flag
 }

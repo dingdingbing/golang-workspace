@@ -11,8 +11,7 @@ import (
 func checkAuth(c *gin.Context) {
 	accessToken := c.Param("token")
 
-	period := getPeriodTime()
-	err := getStock(period, accessToken)
+	err := getStock(accessToken)
 	if err == nil {
 		c.IndentedJSON(http.StatusOK, "当前token有效!")
 	} else {

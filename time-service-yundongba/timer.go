@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -31,23 +32,6 @@ const (
 	Coupons80        = "6229976ffceddb10cd1cb64f"
 )
 
-/*
-*
-
-		param - period : 时间段 08 12 18
-		param - price : 5 10 20 30 50 80
-		抢消费券链接
-	  	GET https://mapv2.51yundong.me/api/coupon/coupons/send?stockId=6228149062ff4125c690ea51&time=12%3A00
-	    Host: mapv2.51yundong.me
-	    Connection: keep-alive
-	    Authorization: Bearer a4dcdf47-1717-4aaa-9067-b826e5b81b20
-	    Accept-Encoding: gzip,compress,br,deflate
-	    User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 16_0_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.29(0x18001d28) NetType/4G Language/zh_CN
-	    Referer: https://servicewechat.com/wx8b97e9b9a6441e29/174/page-frame.html
-	    Content-Type: application/x-www-form-urlencoded
-
-*
-*/
 func send(period string, stockId string, accessToken string) bool {
 	time.Sleep(time.Duration(waitTime) * time.Millisecond)
 	log.Println(time.Now(), "post start")
@@ -70,7 +54,12 @@ func send(period string, stockId string, accessToken string) bool {
 	if err != nil {
 		panic(err)
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(res.Body)
 	log.Println("step 2")
 	result := transformation(res)
 	fmt.Printf("status: %v, response: %v", res.StatusCode, result["msg"])
@@ -99,22 +88,9 @@ func send(period string, stockId string, accessToken string) bool {
 	return false
 }
 
-/*
-*
+func getStock(accessToken string) error {
 
-	Host: mapv2.51yundong.me
-	Connection: keep-alive
-	Authorization: Bearer 9e96d05e-c203-47d2-a148-148b325d847e
-	Accept-Encoding: gzip,compress,br,deflate
-	User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 16_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.29(0x18001d30) NetType/4G Language/zh_CN
-	Referer: https://servicewechat.com/wx8b97e9b9a6441e29/175/page-frame.html
-	Content-Type: application/x-www-form-urlencoded
-
-*
-*/
-func getStock(period string, accessToken string) error {
-
-	url := "https://mapv2.51yundong.me/api/coupon/stocks?view=&groupId=common&time=" + period + "%3A00&noHaveCode=true"
+	url := "https://mapv2.51yundong.me/api/user/users/info?noShowLoading=true"
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Host", "mapv2.51yundong.me")
@@ -129,7 +105,13 @@ func getStock(period string, accessToken string) error {
 	if err != nil {
 		panic(err)
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println("请求失败！")
+		}
+	}(res.Body)
+	log.Println(res.StatusCode)
 
 	// body, _ := ioutil.ReadAll(res.Body)
 	// fmt.Printf("result res:%v, body:%v", res.StatusCode, string(body))
@@ -175,7 +157,10 @@ func transformation(response *http.Response) map[string]string {
 	result := make(map[string]string)
 	body, err := ioutil.ReadAll(response.Body)
 	if err == nil {
-		json.Unmarshal([]byte(string(body)), &result)
+		err := json.Unmarshal([]byte(string(body)), &result)
+		if err != nil {
+			return nil
+		}
 	}
 	fmt.Printf("查看http请求返回结果：%v", result)
 	return result

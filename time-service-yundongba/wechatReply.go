@@ -123,7 +123,7 @@ func checkAndRob(amount string, accessToken string, c *gin.Context, fromUser str
 		return
 	}
 
-	err := getStock(period, accessToken)
+	err := getStock(accessToken)
 	if err != nil {
 		returnMsg = err.Error()
 		WXMsgReply(c, fromUser, toUser, returnMsg)
